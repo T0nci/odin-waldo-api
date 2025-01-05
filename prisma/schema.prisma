@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // swap it out for TEST_DATABASE_URL when needed
+}
+
+model Map {
+  id         Int         @id @default(autoincrement())
+  name       String      @db.VarChar(255)
+  url        String      @db.VarChar(255)
+  users      User[] // Many users can play 1 map
+  characters Character[] // 1 map can have many characters
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(255)
+  token        String   @unique @db.VarChar(255)
+  map          Map      @relation(fields: [map_id], references: [id])
+  map_id       Int
+  started      DateTime @default(dbgenerated("(now() at time zone 'utc')"))
+  finished     Boolean  @default(false)
+  total_time_s Int?
+  guesses      Guess[] // 1 user can have many guesses
+}
+
+model Character {
+  id      Int     @id @default(autoincrement())
+  name    String  @db.VarChar(255)
+  map     Map     @relation(fields: [map_id], references: [id])
+  map_id  Int
+  url     String  @db.VarChar(255)
+  guesses Guess[] // 1 character can be guessed many times
+}
+
+model Guess {
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [user_id], references: [id])
+  user_id   Int
+  character Character @relation(fields: [char_id], references: [id])
+  char_id   Int
+}
