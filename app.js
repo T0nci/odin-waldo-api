@@ -27,5 +27,4 @@ app.use((error, req, res, next) => {
     .json({ error: `${error.statusCode}: ${error.message}` });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Waldo API listening on port ${PORT}!`));
+module.exports = app;
