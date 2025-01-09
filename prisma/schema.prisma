@@ -39,6 +39,8 @@ model Character {
   map     Map     @relation(fields: [map_id], references: [id])
   map_id  Int
   url     String  @db.VarChar(255)
+  start   Int[]
+  end     Int[]
   guesses Guess[] // 1 character can be guessed many times
 }
 
