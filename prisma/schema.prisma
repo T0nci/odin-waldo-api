@@ -24,11 +24,9 @@ model Map {
 model User {
   id           Int      @id @default(autoincrement())
   name         String?  @db.VarChar(255)
-  token        String?  @unique @db.VarChar(255)
   map          Map      @relation(fields: [map_id], references: [id])
   map_id       Int
   started      DateTime @default(dbgenerated("(now() at time zone 'utc')"))
-  finished     Boolean  @default(false)
   total_time_s Int?
   guesses      Guess[] // 1 user can have many guesses
 }
