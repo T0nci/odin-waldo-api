@@ -23,20 +23,20 @@ const maps = [
   },
 ];
 
+beforeAll(() => {
+  return prisma.map.createMany({
+    data: maps,
+  });
+});
+
+afterAll((done) => {
+  prisma.map
+    .deleteMany()
+    .then(() => done())
+    .catch(done);
+});
+
 describe("indexRouter", () => {
-  beforeAll(() => {
-    return prisma.map.createMany({
-      data: maps,
-    });
-  });
-
-  afterAll((done) => {
-    prisma.map
-      .deleteMany()
-      .then(() => done())
-      .catch(done);
-  });
-
   test("/maps returns maps in JSON", async () => {
     // the reason async await works because is returns a promise and jest waits for a resolve or rejection
     const response = await request(app)
@@ -63,47 +63,39 @@ describe("indexRouter", () => {
 });
 
 describe("gameRouter", () => {
-  beforeAll(async () => {
-    await prisma.map.createMany({
-      data: maps,
-    });
-  });
-
-  afterAll(async () => {
-    await prisma.map.deleteMany();
-  });
-
   afterEach(async () => {
     await prisma.user.deleteMany();
   });
 
-  test("/start/:mapId returns error when mapId is invalid", async () => {
-    const response = await request(app)
-      .get("/game/start/invalidMapId")
-      .set("Accept", "application/json; charset=utf-8");
+  describe("/start/:mapId", () => {
+    test("/start/:mapId returns error when mapId is invalid", async () => {
+      const response = await request(app)
+        .get("/game/start/invalidMapId")
+        .set("Accept", "application/json; charset=utf-8");
 
-    expect(response.status).toBe(400);
-    expect(response.header["content-type"]).toBe(
-      "application/json; charset=utf-8",
-    );
-    expect(response.body).toStrictEqual({
-      error: "Invalid map ID.",
+      expect(response.status).toBe(400);
+      expect(response.header["content-type"]).toBe(
+        "application/json; charset=utf-8",
+      );
+      expect(response.body).toStrictEqual({
+        error: "Invalid map ID.",
+      });
     });
-  });
 
-  test("/start/:mapId returns token and creates user successfully", async () => {
-    const response = await request(app)
-      .get("/game/start/1")
-      .set("Accept", "application/json; charset=utf-8");
+    test("/start/:mapId returns token and creates user successfully", async () => {
+      const response = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
 
-    const user = await prisma.user.findFirst();
+      const user = await prisma.user.findFirst();
 
-    expect(response.status).toBe(200);
-    expect(response.header["content-type"]).toBe(
-      "application/json; charset=utf-8",
-    );
-    expect(typeof response.body.token).toBe("string");
-    expect(typeof user).toBe("object");
-    expect(user.map_id).toBe(1);
+      expect(response.status).toBe(200);
+      expect(response.header["content-type"]).toBe(
+        "application/json; charset=utf-8",
+      );
+      expect(typeof response.body.token).toBe("string");
+      expect(typeof user).toBe("object");
+      expect(user.map_id).toBe(1);
+    });
   });
 });
