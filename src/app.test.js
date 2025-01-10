@@ -1,5 +1,11 @@
 const request = require("supertest");
-const { describe, it, expect, beforeAll, afterAll } = require("@jest/globals");
+const {
+  describe,
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+} = require("@jest/globals");
 const prisma = require("./client");
 const app = require("./app");
 
@@ -30,20 +36,8 @@ describe("indexRouter", () => {
       .catch(done);
   });
 
-  it("responds with JSON", async () => {
+  test("/maps returns maps in JSON", async () => {
     // the reason async await works because is returns a promise and jest waits for a resolve or rejection
-    const response = await request(app)
-      .get("/maps")
-      .set("Accept", "application/json");
-
-    console.log(response.body);
-    expect(response.status).toBe(200);
-    expect(response.header["content-type"]).toBe(
-      "application/json; charset=utf-8",
-    );
-  });
-
-  it("returns maps", async () => {
     const response = await request(app)
       .get("/maps")
       .set("Accept", "application/json");
@@ -59,7 +53,10 @@ describe("indexRouter", () => {
       },
     ];
 
-    console.log(response.body);
+    expect(response.status).toBe(200);
+    expect(response.header["content-type"]).toBe(
+      "application/json; charset=utf-8",
+    );
     expect(response.body).toStrictEqual(mapsWithoutId);
   });
 });
