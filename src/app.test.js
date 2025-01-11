@@ -23,6 +23,33 @@ const maps = [
   },
 ];
 
+const characters = [
+  {
+    id: 1,
+    name: "Test Character 1",
+    map_id: 1,
+    url: "Test URL 3",
+    start: [0, 4],
+    end: [0, 4],
+  },
+  {
+    id: 2,
+    name: "Test Character 2",
+    map_id: 1,
+    url: "Test URL 4",
+    start: [5, 9],
+    end: [5, 9],
+  },
+  {
+    id: 3,
+    name: "Test Character 3",
+    map_id: 2,
+    url: "Test URL 5",
+    start: [10, 14],
+    end: [10, 14],
+  },
+];
+
 beforeAll(() => {
   return prisma.map.createMany({
     data: maps,
@@ -98,6 +125,37 @@ describe("gameRouter", () => {
 
       expect(typeof user).toBe("object");
       expect(user.map_id).toBe(1);
+    });
+  });
+
+  describe("/guess/:charId", () => {
+    beforeAll(async () => {
+      await prisma.character.createMany({
+        data: characters,
+      });
+    });
+
+    afterAll(async () => {
+      await prisma.character.deleteMany();
+    });
+
+    test("/guess/:charId returns error there is no token", async () => {
+      const response = await request(app)
+        .post("/game/guess/1")
+        .set("Accept", "application/json; charset=utf-8");
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("401: Unauthorized");
+    });
+
+    test("/guess/:charId returns error when token is invalid", async () => {
+      const response = await request(app)
+        .post("/game/guess/1")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=invalidToken"]);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("401: Unauthorized");
     });
   });
 });

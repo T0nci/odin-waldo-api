@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const prisma = require("../client");
 const { validationResult, param } = require("express-validator");
 const jsonwebtoken = require("jsonwebtoken");
+const { confirmCookieToken } = require("../utils/authMiddleware");
 
 const validateMapId = () =>
   param("mapId")
@@ -31,7 +32,7 @@ const gameStartGet = [
 
     try {
       const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "1d",
+        expiresIn: "6h",
       });
 
       return (
@@ -63,6 +64,29 @@ const gameStartGet = [
   }),
 ];
 
+const guessPost = [
+  confirmCookieToken,
+  asyncHandler(async (req, res) => {
+    console.log(req.numm);
+    if (req.middlewareError)
+      return res
+        .cookie("token", "", {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 0,
+        })
+        .cookie("game", "active", {
+          sameSite: "none",
+          secure: true,
+          maxAge: 0,
+        })
+        .status(401)
+        .json({ error: req.middlewareError });
+  }),
+];
+
 module.exports = {
   gameStartGet,
+  guessPost,
 };
