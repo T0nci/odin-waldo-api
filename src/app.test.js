@@ -93,7 +93,9 @@ describe("gameRouter", () => {
       expect(response.header["content-type"]).toBe(
         "application/json; charset=utf-8",
       );
-      expect(typeof response.body.token).toBe("string");
+
+      expect(response.header["set-cookie"].length).toBe(2);
+
       expect(typeof user).toBe("object");
       expect(user.map_id).toBe(1);
     });

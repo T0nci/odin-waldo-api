@@ -34,7 +34,26 @@ const gameStartGet = [
         expiresIn: "1d",
       });
 
-      return res.json({ token });
+      return (
+        res
+          .cookie("token", token, {
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+            maxAge: 1000 * 60 * 60 * 6,
+          })
+          // a cookie accessible by JavaScript with no sensitive
+          // information just to have React state base itself on
+          // something
+          .cookie("game", "active", {
+            sameSite: "none",
+            secure: true,
+            maxAge: 1000 * 60 * 60 * 6,
+          })
+          .json({
+            status: 200,
+          })
+      );
     } catch (error) {
       if (error instanceof jsonwebtoken.JsonWebTokenError)
         res.json({ error: "Error creating JWT." });

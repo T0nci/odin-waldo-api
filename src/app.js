@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const CustomError = require("./utils/CustomError");
 const indexRouter = require("./routes/indexRouter");
 const gameRouter = require("./routes/gameRouter");
@@ -12,6 +13,13 @@ app.use(
     origin: [process.env.FRONTEND_URL],
   }),
 );
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  next();
+});
+
+app.use(cookieParser());
 
 app.use(express.json());
 
