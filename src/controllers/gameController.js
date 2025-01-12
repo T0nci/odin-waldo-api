@@ -67,6 +67,9 @@ const gameStartGet = [
 const guessPost = [
   confirmCookieToken,
   asyncHandler(async (req, res) => {
+    if (req.user && req.user.total_time_s)
+      return res.status(400).json({ error: "Game ended" });
+
     console.log(req.numm);
     if (req.middlewareError)
       return res

@@ -157,5 +157,31 @@ describe("gameRouter", () => {
       expect(response.status).toBe(401);
       expect(response.body.error).toBe("401: Unauthorized");
     });
+
+    test("/guess/:charId returns error when game is ended", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      // grabs the first cookie, parses it for the name value pair
+      // then parses that for the value only
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      // update the game to be finished
+      await prisma.user.updateMany({
+        data: {
+          total_time_s: 1,
+        },
+      });
+
+      const response = await request(app)
+        .post("/game/guess/1")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Game ended");
+    });
   });
 });
