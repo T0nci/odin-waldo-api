@@ -203,5 +203,41 @@ describe("gameRouter", () => {
       expect(response.status).toBe(404);
       expect(response.body.error).toBe("Game not found");
     });
+
+    test("/guess/:charId returns error when character ID is invalid", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .post("/game/guess/invalidCharId")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Invalid character");
+    });
+
+    test("/guess/:charId returns error when character ID is not on the player map", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        // ID is 3 because the third character(in the above array)
+        // is not on the first map
+        .post("/game/guess/3")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Invalid character");
+    });
   });
 });

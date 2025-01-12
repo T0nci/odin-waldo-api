@@ -17,6 +17,17 @@ const validateMapId = () =>
     })
     .withMessage("Invalid map ID.");
 
+const validateCharId = () =>
+  param("charId").custom(async (charId, { req }) => {
+    const character = await prisma.character.findUnique({
+      where: {
+        id: Number(charId),
+      },
+    });
+
+    if (character.map_id !== req.user.map_id) throw false;
+  });
+
 const gameStartGet = [
   validateMapId(),
   asyncHandler(async (req, res) => {
@@ -66,7 +77,7 @@ const gameStartGet = [
 
 const guessPost = [
   confirmCookieToken,
-  asyncHandler(async (req, res) => {
+  async (req, res, next) => {
     if (req.user && req.user.total_time_s)
       return res.status(400).json({ error: "Game ended" });
 
@@ -102,6 +113,23 @@ const guessPost = [
         })
         .status(401)
         .json({ error: req.middlewareError });
+
+    next();
+  },
+  validateCharId(),
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: "Invalid character" });
+
+    // TODO:
+    // - check if character is in the correct position
+    // - if not - return error
+    // - if yes - continue
+    // - next check if character is already guessed
+    // - then check if user guessed all characters
+    // - if not return correct guess
+    // - if yes remove guesses set time and return end game
   }),
 ];
 
