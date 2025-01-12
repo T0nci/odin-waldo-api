@@ -70,6 +70,23 @@ const guessPost = [
     if (req.user && req.user.total_time_s)
       return res.status(400).json({ error: "Game ended" });
 
+    // this means that the token was valid but the game was deleted
+    if (req.user === null)
+      return res
+        .cookie("token", "", {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 0, // maxAge 0 to clear the cookie
+        })
+        .cookie("game", "active", {
+          sameSite: "none",
+          secure: true,
+          maxAge: 0, // maxAge 0 to clear the cookie
+        })
+        .status(404)
+        .json({ error: "Game not found" });
+
     console.log(req.numm);
     if (req.middlewareError)
       return res

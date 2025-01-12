@@ -183,5 +183,25 @@ describe("gameRouter", () => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBe("Game ended");
     });
+
+    test("/guess/:charId returns error when game is deleted", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      // delete the game
+      await prisma.user.deleteMany();
+
+      const response = await request(app)
+        .post("/game/guess/1")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe("Game not found");
+    });
   });
 });
