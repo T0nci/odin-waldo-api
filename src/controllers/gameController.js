@@ -87,7 +87,6 @@ const guessPost = [
         .status(404)
         .json({ error: "Game not found" });
 
-    console.log(req.numm);
     if (req.middlewareError)
       return res
         .cookie("token", "", {

@@ -3,7 +3,6 @@ const jsonwebtoken = require("jsonwebtoken");
 
 const confirmCookieToken = async (req, res, next) => {
   if (!req.cookies.token) {
-    req.numm = 1;
     req.middlewareError = "401: Unauthorized";
     return next();
   }
@@ -23,7 +22,6 @@ const confirmCookieToken = async (req, res, next) => {
     next();
   } catch (error) {
     if (error instanceof jsonwebtoken.JsonWebTokenError) {
-      req.numm = 2;
       req.middlewareError = "401: Unauthorized";
       return next();
     }
