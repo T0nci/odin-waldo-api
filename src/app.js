@@ -11,13 +11,10 @@ const app = express();
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL],
+    credentials: true,
+    methods: ["GET", "POST"],
   }),
 );
-
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  next();
-});
 
 app.use(cookieParser());
 
