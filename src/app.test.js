@@ -279,5 +279,41 @@ describe("gameRouter", () => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBe("Invalid coordinates");
     });
+
+    test("/guess/:charId returns feedback when guess X coordinate is incorrect", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .post("/game/guess/1")
+        .send({ x: 5, y: 0 })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(200);
+      expect(response.body.result).toBe("Incorrect guess");
+    });
+
+    test("/guess/:charId returns feedback when guess Y coordinate is incorrect", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .post("/game/guess/1")
+        .send({ x: 0, y: 5 })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(200);
+      expect(response.body.result).toBe("Incorrect guess");
+    });
   });
 });

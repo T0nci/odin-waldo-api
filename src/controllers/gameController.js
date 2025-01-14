@@ -131,13 +131,29 @@ const guessPost = [
       return res.status(400).json({ error: errors.array()[0].msg });
 
     // TODO:
-    // - check if character is in the correct position
-    // - if not - return error
-    // - if yes - continue
+    // + check if character is in the correct position
+    // + if not - return error
+    // + if yes - continue
     // - next check if character is already guessed
     // - then check if user guessed all characters
     // - if not return correct guess
     // - if yes remove guesses set time and return end game
+
+    const character = await prisma.character.findUnique({
+      where: {
+        id: Number(req.params.charId),
+      },
+    });
+    const x = Number(req.body.x);
+    const y = Number(req.body.y);
+
+    if (
+      x < character.start[0] ||
+      x > character.end[0] ||
+      y < character.start[1] ||
+      y > character.end[1]
+    )
+      return res.json({ result: "Incorrect guess" });
 
     res.json({ result: "done" });
   }),
