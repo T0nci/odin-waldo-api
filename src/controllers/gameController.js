@@ -131,12 +131,12 @@ const guessPost = [
       return res.status(400).json({ error: errors.array()[0].msg });
 
     // TODO:
+    // + next check if character is already guessed(this is after we add logic for entering a guess)
     // + check if character is in the correct position
     // + if not - return error
     // + if yes - continue
-    // - next check if character is already guessed(this is after we add logic for entering a guess)
     // - then check if user guessed all characters(this is after we add logic for entering a guess)
-    // - if not return correct guess
+    // + if not return correct guess
     // - if yes remove guesses set time and return end game
 
     const character = await prisma.character.findUnique({
@@ -146,6 +146,14 @@ const guessPost = [
     });
     const x = Number(req.body.x);
     const y = Number(req.body.y);
+
+    const guess = await prisma.guess.findFirst({
+      where: {
+        user_id: req.user.id,
+        char_id: character.id,
+      },
+    });
+    if (guess) return res.json({ result: "Already guessed" });
 
     if (
       x < character.start[0] ||
