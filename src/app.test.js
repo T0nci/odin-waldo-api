@@ -29,24 +29,24 @@ const characters = [
     name: "Test Character 1",
     map_id: 1,
     url: "Test URL 3",
-    start: [0, 4],
-    end: [0, 4],
+    start: [0, 0],
+    end: [2, 2],
   },
   {
     id: 2,
     name: "Test Character 2",
     map_id: 1,
     url: "Test URL 4",
-    start: [5, 9],
-    end: [5, 9],
+    start: [3, 3],
+    end: [5, 5],
   },
   {
     id: 3,
     name: "Test Character 3",
     map_id: 2,
     url: "Test URL 5",
-    start: [10, 14],
-    end: [10, 14],
+    start: [6, 6],
+    end: [8, 8],
   },
 ];
 
@@ -129,6 +129,10 @@ describe("gameRouter", () => {
   });
 
   describe("/guess/:charId", () => {
+    afterEach(async () => {
+      await prisma.guess.deleteMany();
+    });
+
     beforeAll(async () => {
       await prisma.character.createMany({
         data: characters,
@@ -314,6 +318,28 @@ describe("gameRouter", () => {
 
       expect(response.status).toBe(200);
       expect(response.body.result).toBe("Incorrect guess");
+    });
+
+    test("/guess/:charId returns feedback when guess is correct", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .post("/game/guess/1")
+        .send({ x: 0, y: 0 })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      const guess = await prisma.guess.findFirst();
+
+      expect(typeof guess).toBe("object");
+      expect(guess.char_id).toBe(1);
+      expect(response.status).toBe(200);
+      expect(response.body.result).toBe("Correct guess");
     });
   });
 });

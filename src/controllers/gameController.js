@@ -134,8 +134,8 @@ const guessPost = [
     // + check if character is in the correct position
     // + if not - return error
     // + if yes - continue
-    // - next check if character is already guessed
-    // - then check if user guessed all characters
+    // - next check if character is already guessed(this is after we add logic for entering a guess)
+    // - then check if user guessed all characters(this is after we add logic for entering a guess)
     // - if not return correct guess
     // - if yes remove guesses set time and return end game
 
@@ -155,7 +155,14 @@ const guessPost = [
     )
       return res.json({ result: "Incorrect guess" });
 
-    res.json({ result: "done" });
+    await prisma.guess.create({
+      data: {
+        user_id: req.user.id,
+        char_id: character.id,
+      },
+    });
+
+    res.json({ result: "Correct guess" });
   }),
 ];
 
