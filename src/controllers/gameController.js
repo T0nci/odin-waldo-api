@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const prisma = require("../client");
-const { validationResult, param } = require("express-validator");
+const { validationResult, param, body } = require("express-validator");
 const jsonwebtoken = require("jsonwebtoken");
 const { confirmCookieToken } = require("../utils/authMiddleware");
 
@@ -18,15 +18,22 @@ const validateMapId = () =>
     .withMessage("Invalid map ID.");
 
 const validateCharId = () =>
-  param("charId").custom(async (charId, { req }) => {
-    const character = await prisma.character.findUnique({
-      where: {
-        id: Number(charId),
-      },
-    });
+  param("charId")
+    .custom(async (charId, { req }) => {
+      const character = await prisma.character.findUnique({
+        where: {
+          id: Number(charId),
+        },
+      });
 
-    if (character.map_id !== req.user.map_id) throw false;
-  });
+      if (character.map_id !== req.user.map_id) throw false;
+    })
+    .withMessage("Invalid character");
+
+const validateCoordinates = () => [
+  body("x").isFloat({ min: 0, max: 10000 }).withMessage("Invalid coordinates"), // 10000 because 10000px in a picture is too much
+  body("y").isFloat({ min: 0, max: 10000 }).withMessage("Invalid coordinates"),
+];
 
 const gameStartGet = [
   validateMapId(),
@@ -117,10 +124,11 @@ const guessPost = [
     next();
   },
   validateCharId(),
+  validateCoordinates(),
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
-      return res.status(400).json({ error: "Invalid character" });
+      return res.status(400).json({ error: errors.array()[0].msg });
 
     // TODO:
     // - check if character is in the correct position
@@ -130,6 +138,8 @@ const guessPost = [
     // - then check if user guessed all characters
     // - if not return correct guess
     // - if yes remove guesses set time and return end game
+
+    res.json({ result: "done" });
   }),
 ];
 

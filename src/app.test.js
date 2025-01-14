@@ -239,5 +239,45 @@ describe("gameRouter", () => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBe("Invalid character");
     });
+
+    test("/guess/:charId returns error when X coordinate is not valid", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        // ID is 3 because the third character(in the above array)
+        // is not on the first map
+        .post("/game/guess/1")
+        .send({ x: "invalid", y: 1 })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Invalid coordinates");
+    });
+
+    test("/guess/:charId returns error when Y coordinate is not valid", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        // ID is 3 because the third character(in the above array)
+        // is not on the first map
+        .post("/game/guess/1")
+        .send({ x: 1, y: -10 })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Invalid coordinates");
+    });
   });
 });
