@@ -85,7 +85,7 @@ const gameStartGet = [
 const guessPost = [
   confirmCookieToken,
   async (req, res, next) => {
-    if (req.user && req.user.total_time_s)
+    if (req.user && req.user.total_time_s !== null)
       return res.status(400).json({ error: "Game ended" });
 
     // this means that the token was valid but the game was deleted
