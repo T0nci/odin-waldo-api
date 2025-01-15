@@ -369,7 +369,7 @@ describe("gameRouter", () => {
       });
     });
 
-    test("/start/:mapId returns token and creates user successfully", async () => {
+    test("/start/:mapId returns token and map URL and creates user successfully", async () => {
       const response = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -380,7 +380,7 @@ describe("gameRouter", () => {
       expect(response.header["content-type"]).toBe(
         "application/json; charset=utf-8",
       );
-
+      expect(response.body.url).toBe("Test URL 1");
       expect(response.header["set-cookie"].length).toBe(2);
 
       expect(typeof user).toBe("object");

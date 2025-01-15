@@ -47,6 +47,11 @@ const gameStartGet = [
         map_id: Number(req.params.mapId),
       },
     });
+    const map = await prisma.map.findUnique({
+      where: {
+        id: Number(req.params.mapId),
+      },
+    });
 
     try {
       const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, {
@@ -70,7 +75,7 @@ const gameStartGet = [
             maxAge: 1000 * 60 * 60 * 6,
           })
           .json({
-            status: 200,
+            url: map.url,
           })
       );
     } catch (error) {
