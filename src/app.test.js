@@ -370,5 +370,29 @@ describe("gameRouter", () => {
       expect(response.status).toBe(200);
       expect(response.body.result).toBe("Already guessed");
     });
+
+    test("/guess/:charId returns feedback when all characters are guessed", async () => {
+      const cookies = await request(app)
+        .get("/game/start/2")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .post("/game/guess/3")
+        .send({ x: 8, y: 8 })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      const guesses = await prisma.guess.findMany();
+      const user = await prisma.user.findFirst();
+
+      expect(guesses.length).toBe(0);
+      expect(typeof user.total_time_s).toBe("number");
+      expect(user.total_time_s).toBeGreaterThanOrEqual(0);
+      expect(response.status).toBe(200);
+      expect(response.body.result).toBe("Game over");
+    });
   });
 });

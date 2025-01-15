@@ -135,9 +135,9 @@ const guessPost = [
     // + check if character is in the correct position
     // + if not - return error
     // + if yes - continue
-    // - then check if user guessed all characters(this is after we add logic for entering a guess)
+    // + then check if user guessed all characters(this is after we add logic for entering a guess)
     // + if not return correct guess
-    // - if yes remove guesses set time and return end game
+    // + if yes remove guesses set time and return end game
 
     const character = await prisma.character.findUnique({
       where: {
@@ -169,6 +169,33 @@ const guessPost = [
         char_id: character.id,
       },
     });
+
+    // the below happens if a character is guessed correctly
+    const userGuesses = await prisma.guess.findMany({
+      where: {
+        user_id: req.user.id,
+      },
+    });
+    const allGuesses = await prisma.character.findMany({
+      where: {
+        map_id: req.user.map_id,
+      },
+    });
+    if (userGuesses.length === allGuesses.length) {
+      await prisma.user.update({
+        data: {
+          total_time_s: (new Date() - req.user.started) / 1000,
+          guesses: {
+            deleteMany: {},
+          },
+        },
+        where: {
+          id: req.user.id,
+        },
+      });
+
+      return res.json({ result: "Game over" });
+    }
 
     res.json({ result: "Correct guess" });
   }),
