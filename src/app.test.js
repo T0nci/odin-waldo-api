@@ -64,28 +64,115 @@ afterAll((done) => {
 });
 
 describe("indexRouter", () => {
-  test("/maps returns maps in JSON", async () => {
-    // the reason async await works because is returns a promise and jest waits for a resolve or rejection
-    const response = await request(app)
-      .get("/maps")
-      .set("Accept", "application/json");
+  describe("/maps", () => {
+    test("/maps returns maps in JSON", async () => {
+      // the reason async await works because is returns a promise and jest waits for a resolve or rejection
+      const response = await request(app)
+        .get("/maps")
+        .set("Accept", "application/json");
 
-    const mapsWithoutId = [
-      {
-        name: "Test Map 1",
-        url: "Test URL 1",
-      },
-      {
-        name: "Test Map 2",
-        url: "Test URL 2",
-      },
-    ];
+      const mapsWithoutId = [
+        {
+          name: "Test Map 1",
+          url: "Test URL 1",
+        },
+        {
+          name: "Test Map 2",
+          url: "Test URL 2",
+        },
+      ];
 
-    expect(response.status).toBe(200);
-    expect(response.header["content-type"]).toBe(
-      "application/json; charset=utf-8",
-    );
-    expect(response.body).toStrictEqual(mapsWithoutId);
+      expect(response.status).toBe(200);
+      expect(response.header["content-type"]).toBe(
+        "application/json; charset=utf-8",
+      );
+      expect(response.body).toStrictEqual(mapsWithoutId);
+    });
+  });
+
+  describe("/name", () => {
+    afterEach(async () => {
+      await prisma.user.deleteMany();
+    });
+
+    test("/name returns error when there is no token", async () => {
+      const response = await request(app)
+        .post("/name")
+        .set("Accept", "application/json; charset=utf-8");
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("401: Unauthorized");
+    });
+
+    test("/name returns error when token is invalid", async () => {
+      const response = await request(app)
+        .post("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=invalidToken"]);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("401: Unauthorized");
+    });
+
+    test("/name returns error when game is still in progress", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .post("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Game still in progress");
+    });
+
+    test("/name returns error when name is already entered", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.updateMany({
+        data: {
+          name: "Odin",
+          total_time_s: 0,
+        },
+      });
+
+      const response = await request(app)
+        .post("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Name already entered");
+    });
+
+    test("/name returns error when game is deleted", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.deleteMany();
+
+      const response = await request(app)
+        .post("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe("Game not found");
+    });
   });
 });
 
