@@ -85,6 +85,15 @@ const namePost = [
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array()[0].msg });
 
+    await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        name: req.body.name,
+      },
+    });
+
     res.json({ result: "Name updated" });
   }),
 ];

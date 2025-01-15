@@ -225,6 +225,31 @@ describe("indexRouter", () => {
         "Name must contain between 1 and 30 characters",
       );
     });
+
+    test("/name updates name when everything is valid", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.updateMany({
+        data: {
+          total_time_s: 0,
+        },
+      });
+
+      const response = await request(app)
+        .post("/name")
+        .send({ name: "Odin" })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(200);
+      expect(response.body.result).toBe("Name updated");
+      expect((await prisma.user.findFirst()).name).toBe("Odin");
+    });
   });
 });
 
