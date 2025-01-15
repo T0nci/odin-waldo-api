@@ -130,15 +130,6 @@ const guessPost = [
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array()[0].msg });
 
-    // TODO:
-    // + next check if character is already guessed(this is after we add logic for entering a guess)
-    // + check if character is in the correct position
-    // + if not - return error
-    // + if yes - continue
-    // + then check if user guessed all characters(this is after we add logic for entering a guess)
-    // + if not return correct guess
-    // + if yes remove guesses set time and return end game
-
     const character = await prisma.character.findUnique({
       where: {
         id: Number(req.params.charId),
