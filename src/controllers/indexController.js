@@ -98,7 +98,27 @@ const namePost = [
   }),
 ];
 
+const leaderboardGet = [
+  asyncHandler(async (req, res, next) => {
+    await prisma.$executeRaw`DELETE FROM "User" WHERE name IS NULL AND started + interval '6h' < now() at time zone 'utc'`;
+
+    next();
+  }),
+  asyncHandler(async (req, res) => {
+    const leaderboard = await prisma.$queryRaw`
+      SELECT u.name AS username, m.name AS "mapName", u.total_time_s AS "totalTimeInSeconds"
+      FROM "User" AS u
+      JOIN "Map" AS m
+      ON u.map_id = m.id
+      WHERE u.name IS NOT NULL
+    `;
+
+    res.json(leaderboard);
+  }),
+];
+
 module.exports = {
   mapsGet,
   namePost,
+  leaderboardGet,
 };

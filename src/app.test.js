@@ -5,6 +5,7 @@ const {
   expect,
   beforeAll,
   afterAll,
+  beforeEach,
   afterEach,
 } = require("@jest/globals");
 const prisma = require("./client");
@@ -47,6 +48,30 @@ const characters = [
     url: "Test URL 5",
     start: [6, 6],
     end: [8, 8],
+  },
+];
+
+const users = [
+  {
+    id: 1,
+    name: "Blah",
+    map_id: 1,
+    started: "2000-01-01T00:00:00Z",
+    total_time_s: 300,
+  },
+  {
+    id: 2,
+    name: null,
+    map_id: 1,
+    started: "2000-01-01T00:00:00Z",
+    total_time_s: null,
+  },
+  {
+    id: 3,
+    name: "Odin",
+    map_id: 2,
+    started: "2000-01-01T00:00:00Z",
+    total_time_s: 100,
   },
 ];
 
@@ -249,6 +274,49 @@ describe("indexRouter", () => {
       expect(response.status).toBe(200);
       expect(response.body.result).toBe("Name updated");
       expect((await prisma.user.findFirst()).name).toBe("Odin");
+    });
+  });
+
+  describe("/leaderboard", () => {
+    beforeEach(async () => {
+      await prisma.user.createMany({
+        data: users,
+      });
+    });
+
+    afterEach(async () => {
+      await prisma.user.deleteMany();
+    });
+
+    test("/leaderboard returns correct information", async () => {
+      const expected = [
+        {
+          username: "Blah",
+          mapName: "Test Map 1",
+          totalTimeInSeconds: 300,
+        },
+        {
+          username: "Odin",
+          mapName: "Test Map 2",
+          totalTimeInSeconds: 100,
+        },
+      ];
+
+      const response = await request(app)
+        .get("/leaderboard")
+        .set("Accept", "application/json; charset=utf-8");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toStrictEqual(expected);
+    });
+
+    test("/leaderboard deletes old records when being accessed", async () => {
+      const response = await request(app)
+        .get("/leaderboard")
+        .set("Accept", "application/json; charset=utf-8");
+
+      expect(response.status).toBe(200);
+      expect((await prisma.user.findMany()).length).toBe(2);
     });
   });
 });
