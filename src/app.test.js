@@ -90,20 +90,48 @@ afterAll((done) => {
 
 describe("indexRouter", () => {
   describe("/maps", () => {
+    beforeAll(async () => {
+      await prisma.character.createMany({
+        data: characters,
+      });
+    });
+
+    afterAll(async () => {
+      await prisma.character.deleteMany();
+    });
+
     test("/maps returns maps in JSON", async () => {
       // the reason async await works because is returns a promise and jest waits for a resolve or rejection
       const response = await request(app)
         .get("/maps")
         .set("Accept", "application/json");
 
-      const mapsWithoutId = [
+      const mapsWithCharacters = [
         {
+          id: 1,
           name: "Test Map 1",
           url: "Test URL 1",
+          characters: [
+            {
+              name: "Test Character 1",
+              url: "Test URL 3",
+            },
+            {
+              name: "Test Character 2",
+              url: "Test URL 4",
+            },
+          ],
         },
         {
+          id: 2,
           name: "Test Map 2",
           url: "Test URL 2",
+          characters: [
+            {
+              name: "Test Character 3",
+              url: "Test URL 5",
+            },
+          ],
         },
       ];
 
@@ -111,7 +139,7 @@ describe("indexRouter", () => {
       expect(response.header["content-type"]).toBe(
         "application/json; charset=utf-8",
       );
-      expect(response.body).toStrictEqual(mapsWithoutId);
+      expect(response.body).toStrictEqual(mapsWithCharacters);
     });
   });
 

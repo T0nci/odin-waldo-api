@@ -13,9 +13,13 @@ const validateName = () =>
 
 const mapsGet = asyncHandler(async (req, res) => {
   const maps = await prisma.map.findMany({
-    select: {
-      name: true,
-      url: true,
+    include: {
+      characters: {
+        select: {
+          name: true,
+          url: true,
+        },
+      },
     },
   });
 
