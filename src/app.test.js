@@ -363,8 +363,10 @@ describe("gameRouter", () => {
         .set("Cookie", ["token=" + cookie]);
 
       const guesses = await prisma.guess.findMany();
+      const user = await prisma.user.findFirst();
 
       expect(guesses.length).toBe(1);
+      expect(user.total_time_s).toBeNull();
       expect(response.status).toBe(200);
       expect(response.body.result).toBe("Already guessed");
     });
