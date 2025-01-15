@@ -1,6 +1,15 @@
 const asyncHandler = require("express-async-handler");
+const { validationResult, body } = require("express-validator");
 const prisma = require("../client");
 const { confirmCookieToken } = require("../utils/authMiddleware");
+
+const validateName = () =>
+  body("name")
+    .trim()
+    .isAlphanumeric()
+    .withMessage("Name must only contain letters and/or numbers")
+    .isLength({ min: 1, max: 30 })
+    .withMessage("Name must contain between 1 and 30 characters");
 
 const mapsGet = asyncHandler(async (req, res) => {
   const maps = await prisma.map.findMany({
@@ -70,7 +79,12 @@ const namePost = [
 
     next();
   }),
+  validateName(),
   asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: errors.array()[0].msg });
+
     res.json({ result: "Name updated" });
   }),
 ];

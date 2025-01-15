@@ -173,6 +173,58 @@ describe("indexRouter", () => {
       expect(response.status).toBe(404);
       expect(response.body.error).toBe("Game not found");
     });
+
+    test("/name returns error when name is not consisting of only letters and numbers", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.updateMany({
+        data: {
+          total_time_s: 0,
+        },
+      });
+
+      const response = await request(app)
+        .post("/name")
+        .send({ name: "invalid name!!!" })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe(
+        "Name must only contain letters and/or numbers",
+      );
+    });
+
+    test("/name returns error when name is not between 1 and 30 characters", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.updateMany({
+        data: {
+          total_time_s: 0,
+        },
+      });
+
+      const response = await request(app)
+        .post("/name")
+        .send({ name: "InvalidInvalidInvalidInvalidInvalid" })
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe(
+        "Name must contain between 1 and 30 characters",
+      );
+    });
   });
 });
 
