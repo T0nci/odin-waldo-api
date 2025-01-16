@@ -67,24 +67,14 @@ const gameStartGet = [
         expiresIn: "6h",
       });
 
-      return (
-        res
-          .cookie("token", token, {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
-            maxAge: 1000 * 60 * 60 * 6,
-          })
-          // a cookie accessible by JavaScript with no sensitive
-          // information just to have React state base itself on
-          // something
-          .cookie("game", "active", {
-            sameSite: "none",
-            secure: true,
-            maxAge: 1000 * 60 * 60 * 6,
-          })
-          .json(map)
-      );
+      return res
+        .cookie("token", token, {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 1000 * 60 * 60 * 6,
+        })
+        .json(map);
     } catch (error) {
       if (error instanceof jsonwebtoken.JsonWebTokenError)
         res.json({ error: "Error creating JWT." });
@@ -109,11 +99,6 @@ const guessPost = [
           secure: true,
           maxAge: 0, // maxAge 0 to clear the cookie
         })
-        .cookie("game", "active", {
-          sameSite: "none",
-          secure: true,
-          maxAge: 0, // maxAge 0 to clear the cookie
-        })
         .status(404)
         .json({ error: "Game not found" });
 
@@ -121,11 +106,6 @@ const guessPost = [
       return res
         .cookie("token", "", {
           httpOnly: true,
-          sameSite: "none",
-          secure: true,
-          maxAge: 0,
-        })
-        .cookie("game", "active", {
           sameSite: "none",
           secure: true,
           maxAge: 0,

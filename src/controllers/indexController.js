@@ -37,11 +37,6 @@ const namePost = [
           secure: true,
           maxAge: 0, // maxAge 0 to clear the cookie
         })
-        .cookie("game", "active", {
-          sameSite: "none",
-          secure: true,
-          maxAge: 0, // maxAge 0 to clear the cookie
-        })
         .status(400)
         .json({ error: "Name already entered" });
 
@@ -54,11 +49,6 @@ const namePost = [
           secure: true,
           maxAge: 0, // maxAge 0 to clear the cookie
         })
-        .cookie("game", "active", {
-          sameSite: "none",
-          secure: true,
-          maxAge: 0, // maxAge 0 to clear the cookie
-        })
         .status(404)
         .json({ error: "Game not found" });
 
@@ -66,11 +56,6 @@ const namePost = [
       return res
         .cookie("token", "", {
           httpOnly: true,
-          sameSite: "none",
-          secure: true,
-          maxAge: 0,
-        })
-        .cookie("game", "active", {
           sameSite: "none",
           secure: true,
           maxAge: 0,

@@ -392,7 +392,7 @@ describe("gameRouter", () => {
         "application/json; charset=utf-8",
       );
       expect(response.body).toStrictEqual(expectedBody);
-      expect(response.header["set-cookie"].length).toBe(2);
+      expect(response.header["set-cookie"].length).toBe(1);
 
       expect(typeof user).toBe("object");
       expect(user.map_id).toBe(1);
