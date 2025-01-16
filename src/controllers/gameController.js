@@ -15,7 +15,7 @@ const validateMapId = () =>
 
       if (!map) throw false;
     })
-    .withMessage("Invalid map ID.");
+    .withMessage("Invalid map ID");
 
 const validateCharId = () =>
   param("charId")

@@ -351,7 +351,7 @@ describe("gameRouter", () => {
         "application/json; charset=utf-8",
       );
       expect(response.body).toStrictEqual({
-        error: "Invalid map ID.",
+        error: "Invalid map ID",
       });
     });
 
