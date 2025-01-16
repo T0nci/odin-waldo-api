@@ -51,7 +51,16 @@ const gameStartGet = [
       where: {
         id: Number(req.params.mapId),
       },
+      include: {
+        characters: {
+          select: {
+            name: true,
+            url: true,
+          },
+        },
+      },
     });
+    delete map.id;
 
     try {
       const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, {
@@ -74,9 +83,7 @@ const gameStartGet = [
             secure: true,
             maxAge: 1000 * 60 * 60 * 6,
           })
-          .json({
-            url: map.url,
-          })
+          .json(map)
       );
     } catch (error) {
       if (error instanceof jsonwebtoken.JsonWebTokenError)

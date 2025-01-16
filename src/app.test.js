@@ -340,6 +340,16 @@ describe("gameRouter", () => {
     await prisma.user.deleteMany();
   });
 
+  beforeAll(async () => {
+    await prisma.character.createMany({
+      data: characters,
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.character.deleteMany();
+  });
+
   describe("/start/:mapId", () => {
     test("/start/:mapId returns error when mapId is invalid", async () => {
       const response = await request(app)
@@ -356,6 +366,21 @@ describe("gameRouter", () => {
     });
 
     test("/start/:mapId returns token and map URL and creates user successfully", async () => {
+      const expectedBody = {
+        name: "Test Map 1",
+        url: "Test URL 1",
+        characters: [
+          {
+            name: "Test Character 1",
+            url: "Test URL 3",
+          },
+          {
+            name: "Test Character 2",
+            url: "Test URL 4",
+          },
+        ],
+      };
+
       const response = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -366,7 +391,7 @@ describe("gameRouter", () => {
       expect(response.header["content-type"]).toBe(
         "application/json; charset=utf-8",
       );
-      expect(response.body.url).toBe("Test URL 1");
+      expect(response.body).toStrictEqual(expectedBody);
       expect(response.header["set-cookie"].length).toBe(2);
 
       expect(typeof user).toBe("object");
@@ -377,16 +402,6 @@ describe("gameRouter", () => {
   describe("/guess/:charId", () => {
     afterEach(async () => {
       await prisma.guess.deleteMany();
-    });
-
-    beforeAll(async () => {
-      await prisma.character.createMany({
-        data: characters,
-      });
-    });
-
-    afterAll(async () => {
-      await prisma.character.deleteMany();
     });
 
     test("/guess/:charId returns error there is no token", async () => {
