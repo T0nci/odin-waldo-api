@@ -106,32 +106,18 @@ describe("indexRouter", () => {
         .get("/maps")
         .set("Accept", "application/json");
 
-      const mapsWithCharacters = [
+      const mapsWithCharacterCount = [
         {
           id: 1,
           name: "Test Map 1",
           url: "Test URL 1",
-          characters: [
-            {
-              name: "Test Character 1",
-              url: "Test URL 3",
-            },
-            {
-              name: "Test Character 2",
-              url: "Test URL 4",
-            },
-          ],
+          characters: 2,
         },
         {
           id: 2,
           name: "Test Map 2",
           url: "Test URL 2",
-          characters: [
-            {
-              name: "Test Character 3",
-              url: "Test URL 5",
-            },
-          ],
+          characters: 1,
         },
       ];
 
@@ -139,7 +125,7 @@ describe("indexRouter", () => {
       expect(response.header["content-type"]).toBe(
         "application/json; charset=utf-8",
       );
-      expect(response.body).toStrictEqual(mapsWithCharacters);
+      expect(response.body).toStrictEqual(mapsWithCharacterCount);
     });
   });
 

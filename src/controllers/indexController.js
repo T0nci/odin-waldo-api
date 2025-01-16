@@ -12,16 +12,13 @@ const validateName = () =>
     .withMessage("Name must contain between 1 and 30 characters");
 
 const mapsGet = asyncHandler(async (req, res) => {
-  const maps = await prisma.map.findMany({
-    include: {
-      characters: {
-        select: {
-          name: true,
-          url: true,
-        },
-      },
-    },
-  });
+  const maps = await prisma.$queryRaw`
+    SELECT m.id, m.name, m.url, COUNT(*)::int AS "characters"
+    FROM "Map" AS m
+    JOIN "Character" AS c
+    ON m.id = c.map_id
+    GROUP BY m.id
+  `;
 
   return res.json(maps);
 });
