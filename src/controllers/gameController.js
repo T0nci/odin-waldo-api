@@ -54,6 +54,7 @@ const gameStartGet = [
       include: {
         characters: {
           select: {
+            id: true,
             name: true,
             url: true,
           },

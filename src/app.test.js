@@ -371,10 +371,12 @@ describe("gameRouter", () => {
         url: "Test URL 1",
         characters: [
           {
+            id: 1,
             name: "Test Character 1",
             url: "Test URL 3",
           },
           {
+            id: 2,
             name: "Test Character 2",
             url: "Test URL 4",
           },
