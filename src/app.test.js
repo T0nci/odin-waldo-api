@@ -234,7 +234,7 @@ describe("indexRouter", () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toStrictEqual({
-        totalTimeInSeconds: 0,
+        totalTimeInSeconds: "0",
         map: "Test Map 1",
       });
     });
@@ -412,12 +412,12 @@ describe("indexRouter", () => {
         {
           username: "Blah",
           mapName: "Test Map 1",
-          totalTimeInSeconds: 300,
+          totalTimeInSeconds: "300",
         },
         {
           username: "Odin",
           mapName: "Test Map 2",
-          totalTimeInSeconds: 100,
+          totalTimeInSeconds: "100",
         },
       ];
 
@@ -755,10 +755,14 @@ describe("gameRouter", () => {
 
       const guesses = await prisma.guess.findMany();
       const user = await prisma.user.findFirst();
+      const totalTime = Number(user.total_time_s);
 
       expect(guesses.length).toBe(0);
-      expect(typeof user.total_time_s).toBe("number");
-      expect(user.total_time_s).toBeGreaterThanOrEqual(0);
+
+      expect(typeof totalTime).toBe("number");
+      expect(isNaN(totalTime)).toBe(false);
+      expect(totalTime).toBeGreaterThanOrEqual(0);
+
       expect(response.status).toBe(200);
       expect(response.body.result).toBe("Game over");
     });
