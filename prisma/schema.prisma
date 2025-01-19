@@ -27,7 +27,7 @@ model User {
   map          Map      @relation(fields: [map_id], references: [id])
   map_id       Int
   started      DateTime @default(dbgenerated("(now() at time zone 'utc')"))
-  total_time_s Decimal?
+  total_time_s Decimal? @db.Decimal(65, 3)
   guesses      Guess[] // 1 user can have many guesses
 }
 
