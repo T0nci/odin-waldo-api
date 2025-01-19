@@ -134,7 +134,112 @@ describe("indexRouter", () => {
       await prisma.user.deleteMany();
     });
 
-    test("/name returns error when there is no token", async () => {
+    test("GET /name returns error when there is no token", async () => {
+      const response = await request(app)
+        .get("/name")
+        .set("Accept", "application/json; charset=utf-8");
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("401: Unauthorized");
+    });
+
+    test("GET /name returns error when token is invalid", async () => {
+      const response = await request(app)
+        .get("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=invalidToken"]);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("401: Unauthorized");
+    });
+
+    test("GET /name returns error when game is still in progress", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      const response = await request(app)
+        .get("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Game still in progress");
+    });
+
+    test("GET /name returns error when name is already entered", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.updateMany({
+        data: {
+          name: "Odin",
+          total_time_s: 0,
+        },
+      });
+
+      const response = await request(app)
+        .get("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe("Name already entered");
+    });
+
+    test("GET /name returns error when game is deleted", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.deleteMany();
+
+      const response = await request(app)
+        .get("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe("Game not found");
+    });
+
+    test("GET /name returns data", async () => {
+      const cookies = await request(app)
+        .get("/game/start/1")
+        .set("Accept", "application/json; charset=utf-8");
+      const cookie = cookies.header["set-cookie"][0]
+        .split("; ")[0]
+        .split("=")[1];
+
+      await prisma.user.updateMany({
+        data: {
+          total_time_s: 0,
+        },
+      });
+
+      const response = await request(app)
+        .get("/name")
+        .set("Accept", "application/json; charset=utf-8")
+        .set("Cookie", ["token=" + cookie]);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toStrictEqual({
+        totalTimeInSeconds: 0,
+        map: "Test Map 1",
+      });
+    });
+
+    test("POST /name returns error when there is no token", async () => {
       const response = await request(app)
         .post("/name")
         .set("Accept", "application/json; charset=utf-8");
@@ -143,7 +248,7 @@ describe("indexRouter", () => {
       expect(response.body.error).toBe("401: Unauthorized");
     });
 
-    test("/name returns error when token is invalid", async () => {
+    test("POST /name returns error when token is invalid", async () => {
       const response = await request(app)
         .post("/name")
         .set("Accept", "application/json; charset=utf-8")
@@ -153,7 +258,7 @@ describe("indexRouter", () => {
       expect(response.body.error).toBe("401: Unauthorized");
     });
 
-    test("/name returns error when game is still in progress", async () => {
+    test("POST /name returns error when game is still in progress", async () => {
       const cookies = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -170,7 +275,7 @@ describe("indexRouter", () => {
       expect(response.body.error).toBe("Game still in progress");
     });
 
-    test("/name returns error when name is already entered", async () => {
+    test("POST /name returns error when name is already entered", async () => {
       const cookies = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -194,7 +299,7 @@ describe("indexRouter", () => {
       expect(response.body.error).toBe("Name already entered");
     });
 
-    test("/name returns error when game is deleted", async () => {
+    test("POST /name returns error when game is deleted", async () => {
       const cookies = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -213,7 +318,7 @@ describe("indexRouter", () => {
       expect(response.body.error).toBe("Game not found");
     });
 
-    test("/name returns error when name is not consisting of only letters and numbers", async () => {
+    test("POST /name returns error when name is not consisting of only letters and numbers", async () => {
       const cookies = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -239,7 +344,7 @@ describe("indexRouter", () => {
       );
     });
 
-    test("/name returns error when name is not between 1 and 30 characters", async () => {
+    test("POST /name returns error when name is not between 1 and 30 characters", async () => {
       const cookies = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");
@@ -265,7 +370,7 @@ describe("indexRouter", () => {
       );
     });
 
-    test("/name updates name when everything is valid", async () => {
+    test("POST /name updates name when everything is valid", async () => {
       const cookies = await request(app)
         .get("/game/start/1")
         .set("Accept", "application/json; charset=utf-8");

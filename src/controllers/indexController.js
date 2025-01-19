@@ -23,6 +23,59 @@ const mapsGet = asyncHandler(async (req, res) => {
   return res.json(maps);
 });
 
+const nameGet = [
+  confirmCookieToken,
+  (req, res, next) => {
+    if (req.user && req.user.total_time_s === null)
+      return res.status(400).json({ error: "Game still in progress" });
+
+    if (req.user && req.user.name)
+      return res
+        .cookie("token", "", {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 0, // maxAge 0 to clear the cookie
+        })
+        .status(400)
+        .json({ error: "Name already entered" });
+
+    // this means that the token was valid but the game was deleted
+    if (req.user === null)
+      return res
+        .cookie("token", "", {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 0, // maxAge 0 to clear the cookie
+        })
+        .status(404)
+        .json({ error: "Game not found" });
+
+    if (req.middlewareError)
+      return res
+        .cookie("token", "", {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+          maxAge: 0,
+        })
+        .status(401)
+        .json({ error: req.middlewareError });
+
+    next();
+  },
+  asyncHandler(async (req, res) => {
+    const map = await prisma.map.findUnique({
+      where: {
+        id: req.user.map_id,
+      },
+    });
+
+    res.json({ totalTimeInSeconds: req.user.total_time_s, map: map.name });
+  }),
+];
+
 const namePost = [
   confirmCookieToken,
   asyncHandler(async (req, res, next) => {
@@ -105,6 +158,7 @@ const leaderboardGet = [
 
 module.exports = {
   mapsGet,
+  nameGet,
   namePost,
   leaderboardGet,
 };
