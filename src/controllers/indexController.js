@@ -3,6 +3,12 @@ const { validationResult, body } = require("express-validator");
 const prisma = require("../client");
 const { confirmCookieToken } = require("../utils/authMiddleware");
 
+const cleanUpUsers = asyncHandler(async (req, res, next) => {
+  await prisma.$executeRaw`DELETE FROM "User" WHERE name IS NULL AND started + interval '6h' < now() at time zone 'utc'`;
+
+  next();
+});
+
 const validateName = () =>
   body("name")
     .trim()
@@ -24,6 +30,7 @@ const mapsGet = asyncHandler(async (req, res) => {
 });
 
 const nameGet = [
+  cleanUpUsers,
   confirmCookieToken,
   (req, res, next) => {
     if (req.user && req.user.total_time_s === null)
@@ -138,11 +145,7 @@ const namePost = [
 ];
 
 const leaderboardGet = [
-  asyncHandler(async (req, res, next) => {
-    await prisma.$executeRaw`DELETE FROM "User" WHERE name IS NULL AND started + interval '6h' < now() at time zone 'utc'`;
-
-    next();
-  }),
+  cleanUpUsers,
   asyncHandler(async (req, res) => {
     const leaderboard = await prisma.$queryRaw`
       SELECT u.id AS id, u.name AS username, m.name AS "mapName", u.total_time_s AS "totalTimeInSeconds"
