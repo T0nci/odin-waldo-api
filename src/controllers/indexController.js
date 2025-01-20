@@ -145,14 +145,21 @@ const leaderboardGet = [
   }),
   asyncHandler(async (req, res) => {
     const leaderboard = await prisma.$queryRaw`
-      SELECT u.name AS username, m.name AS "mapName", u.total_time_s AS "totalTimeInSeconds"
+      SELECT u.id AS id, u.name AS username, m.name AS "mapName", u.total_time_s AS "totalTimeInSeconds"
       FROM "User" AS u
       JOIN "Map" AS m
       ON u.map_id = m.id
       WHERE u.name IS NOT NULL
     `;
 
-    res.json(leaderboard);
+    const maps = await prisma.map.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    res.json({ leaderboard, maps });
   }),
 ];
 

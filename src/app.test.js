@@ -408,18 +408,26 @@ describe("indexRouter", () => {
     });
 
     test("/leaderboard returns correct information", async () => {
-      const expected = [
-        {
-          username: "Blah",
-          mapName: "Test Map 1",
-          totalTimeInSeconds: "300",
-        },
-        {
-          username: "Odin",
-          mapName: "Test Map 2",
-          totalTimeInSeconds: "100",
-        },
-      ];
+      const expected = {
+        leaderboard: [
+          {
+            id: 1,
+            username: "Blah",
+            mapName: "Test Map 1",
+            totalTimeInSeconds: "300",
+          },
+          {
+            id: 3,
+            username: "Odin",
+            mapName: "Test Map 2",
+            totalTimeInSeconds: "100",
+          },
+        ],
+        maps: [
+          { id: 1, name: "Test Map 1" },
+          { id: 2, name: "Test Map 2" },
+        ],
+      };
 
       const response = await request(app)
         .get("/leaderboard")
