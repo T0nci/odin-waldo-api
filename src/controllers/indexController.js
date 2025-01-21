@@ -147,14 +147,6 @@ const namePost = [
 const leaderboardGet = [
   cleanUpUsers,
   asyncHandler(async (req, res) => {
-    const leaderboard = await prisma.$queryRaw`
-      SELECT u.id AS id, u.name AS username, m.name AS "mapName", u.total_time_s AS "totalTimeInSeconds"
-      FROM "User" AS u
-      JOIN "Map" AS m
-      ON u.map_id = m.id
-      WHERE u.name IS NOT NULL
-    `;
-
     const maps = await prisma.map.findMany({
       select: {
         id: true,
@@ -162,7 +154,21 @@ const leaderboardGet = [
       },
     });
 
-    res.json({ leaderboard, maps });
+    for (const map of maps) {
+      // typecast to integer because RANK returns BigInt for some reason???
+      const leaderboard = await prisma.$queryRaw`
+        SELECT u.id AS id, u.name AS username, u.total_time_s AS "totalTimeInSeconds", RANK() OVER (ORDER BY u.total_time_s)::int AS num
+        FROM "User" AS u
+        JOIN "Map" AS m
+        ON u.map_id = m.id
+        WHERE u.name IS NOT NULL AND m.id = ${map.id}
+        ORDER BY u.total_time_s;
+      `;
+
+      map.leaderboard = leaderboard;
+    }
+
+    res.json(maps);
   }),
 ];
 

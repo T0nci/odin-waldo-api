@@ -57,7 +57,7 @@ const users = [
     name: "Blah",
     map_id: 1,
     started: "2000-01-01T00:00:00Z",
-    total_time_s: 300,
+    total_time_s: 299.999,
   },
   {
     id: 2,
@@ -71,7 +71,14 @@ const users = [
     name: "Odin",
     map_id: 2,
     started: "2000-01-01T00:00:00Z",
-    total_time_s: 100,
+    total_time_s: 100.001,
+  },
+  {
+    id: 4,
+    name: "Thor",
+    map_id: 1,
+    started: "2000-01-01T00:00:00Z",
+    total_time_s: 99.999,
   },
 ];
 
@@ -408,26 +415,38 @@ describe("indexRouter", () => {
     });
 
     test("/leaderboard returns correct information", async () => {
-      const expected = {
-        leaderboard: [
-          {
-            id: 1,
-            username: "Blah",
-            mapName: "Test Map 1",
-            totalTimeInSeconds: "300",
-          },
-          {
-            id: 3,
-            username: "Odin",
-            mapName: "Test Map 2",
-            totalTimeInSeconds: "100",
-          },
-        ],
-        maps: [
-          { id: 1, name: "Test Map 1" },
-          { id: 2, name: "Test Map 2" },
-        ],
-      };
+      const expected = [
+        {
+          id: 1,
+          name: "Test Map 1",
+          leaderboard: [
+            {
+              id: 4,
+              username: "Thor",
+              totalTimeInSeconds: "99.999",
+              num: 1,
+            },
+            {
+              id: 1,
+              username: "Blah",
+              totalTimeInSeconds: "299.999",
+              num: 2,
+            },
+          ],
+        },
+        {
+          id: 2,
+          name: "Test Map 2",
+          leaderboard: [
+            {
+              id: 3,
+              username: "Odin",
+              totalTimeInSeconds: "100.001",
+              num: 1,
+            },
+          ],
+        },
+      ];
 
       const response = await request(app)
         .get("/leaderboard")
@@ -443,7 +462,7 @@ describe("indexRouter", () => {
         .set("Accept", "application/json; charset=utf-8");
 
       expect(response.status).toBe(200);
-      expect((await prisma.user.findMany()).length).toBe(2);
+      expect((await prisma.user.findMany()).length).toBe(3);
     });
   });
 });
