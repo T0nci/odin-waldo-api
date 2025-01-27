@@ -1,11 +1,11 @@
-# Where's Waldo
+# Hidden in Plain Sight
 
-This project was a fun little game where I solidified previous knowledge and learnt and implemented some new things:
+This project was a fun little game(inspired by the popular game Where's Waldo/Wally) where I solidified previous knowledge and learnt and implemented some new things:
 
 - cross site cookies
 - back-end tests with SuperTest
 
-Where's Waldo is a Jamstack website(made up of PostgreSQL, Express and React) consisting of 2 parts:
+Hidden in Plain Sight is a Jamstack website(made up of PostgreSQL, Express and React) consisting of 2 parts:
 
 - RESTful API back-end(this repository) with the following endpoints:
   - get all maps and their info
@@ -22,4 +22,4 @@ Where's Waldo is a Jamstack website(made up of PostgreSQL, Express and React) co
 
 ## Live Preview
 
-The Live Preview can be visited from the [front-end repo link](https://odin-waldo-frontend.vercel.app) for this project, or go to the [front-end repo](https://github.com/T0nci/odin-waldo-frontend) and visit the site from there.
+The Live Preview can be visited from the [live preview link](https://odin-waldo-frontend.vercel.app) or explore the [front-end repo](https://github.com/T0nci/odin-waldo-frontend) and visit the site from there.
