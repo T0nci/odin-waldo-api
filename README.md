@@ -40,7 +40,7 @@ Front-end features:
 
 - installed [NodeJS](https://nodejs.org/en)
 - installed [PostgreSQL](https://www.postgresql.org/download/)
-- created empty 2 PostgreSQL databases(one's for testing, the other one is for the server)
+- created empty PostgreSQL database
 
 ### Setup and running locally
 
@@ -61,7 +61,6 @@ Front-end features:
    PORT='SELECT A PORT'
    NODE_ENV='development'
    DATABASE_URL='YOUR POSTGRESQL DATABASE URL'
-   TEST_DATABASE_URL='YOUR POSTGRESQL TEST DATABASE URL'
    JWT_SECRET='SET A SECRET THAT IS RANDOM AND AT LEAST 32 CHARACTERS LONG'
    FRONT_END='THE FRONT END URL'
    ```
