@@ -4,7 +4,26 @@ const prisma = require("../client");
 const { confirmCookieToken } = require("../utils/authMiddleware");
 
 const cleanUpUsers = asyncHandler(async (req, res, next) => {
-  await prisma.$executeRaw`DELETE FROM "User" WHERE name IS NULL AND started + interval '6h' < now() at time zone 'utc'`;
+  const userIds = (
+    await prisma.$queryRaw`SELECT id FROM "User" WHERE name IS NULL AND started + interval '6h' < now() at time zone 'utc'`
+  ).map((row) => row.id);
+
+  await prisma.$transaction([
+    prisma.guess.deleteMany({
+      where: {
+        user_id: {
+          in: userIds,
+        },
+      },
+    }),
+    prisma.user.deleteMany({
+      where: {
+        id: {
+          in: userIds,
+        },
+      },
+    }),
+  ]);
 
   next();
 });
