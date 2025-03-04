@@ -77,6 +77,6 @@ The server should be up and running. You can interact with the server through [P
 
 ## License
 
-[MIT](LICENSE.txt)
+[MIT](LICENSE)
 
 [(back to top)](#hidden-in-plain-sight)
